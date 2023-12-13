@@ -1,6 +1,6 @@
 use std::env;
 
-use actix_web::{App, get, HttpServer, Responder, web};
+use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use actix_web::middleware::Logger;
 use actix_web_httpauth::middleware::HttpAuthentication;
 use diesel::PgConnection;
@@ -33,11 +33,12 @@ async fn main() -> std::io::Result<()> {
         auth_validator.validator(req, credentials)
     };
     let auth = HttpAuthentication::bearer(auth_validator_func);
-
+    let api_port = env::var("API_PORT").expect("API_PORT must be set.").parse().expect("API_PORT must be a number.");
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(web::Data::new(pool.clone()))
+            .service(health)
             .service(
                 web::scope("/api/v1/index")
                     .wrap(auth.clone())
@@ -50,7 +51,7 @@ async fn main() -> std::io::Result<()> {
                     .service(users::login),
             )
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", api_port))?
     .run()
     .await
 }
@@ -58,4 +59,9 @@ async fn main() -> std::io::Result<()> {
 #[get("/")]
 async fn index() -> impl Responder {
     "Hello World with Security!"
+}
+
+#[get("/health")]
+async fn health() -> HttpResponse {
+    HttpResponse::Ok().body("")
 }

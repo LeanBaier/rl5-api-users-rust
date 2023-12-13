@@ -4,7 +4,6 @@ use actix_web::dev::ServiceRequest;
 use actix_web::Error;
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use anyhow::anyhow;
-use chrono::{NaiveDateTime, Utc};
 use jsonwebtoken::{Algorithm, decode, DecodingKey, encode, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
