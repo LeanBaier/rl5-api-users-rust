@@ -34,6 +34,7 @@ async fn main() -> std::io::Result<()> {
     };
     let auth = HttpAuthentication::bearer(auth_validator_func);
     let api_port = env::var("API_PORT").expect("API_PORT must be set.").parse().expect("API_PORT must be a number.");
+    let api_host = env::var("API_HOST").expect("API_HOST must be set.");
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
@@ -51,7 +52,7 @@ async fn main() -> std::io::Result<()> {
                     .service(users::login),
             )
     })
-    .bind(("127.0.0.1", api_port))?
+    .bind((api_host, api_port))?
     .run()
     .await
 }
